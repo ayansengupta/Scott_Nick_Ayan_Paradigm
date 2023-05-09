@@ -26,7 +26,7 @@ beep_sound_duration = 0.5
 #number_of_trials = 5
 number_of_trials = trial_order_list.COUNTDOWN_NUMBER.size # number of trials initialization
 speech_engine = pyttsx3.init() #initializing the speech engine
-trial_duration = 20.0 #trial duration in seconds
+trial_duration = 30.0 #trial duration in seconds
 
 ###"""SETTINGS FOR RATE< VOLUME and VOICE of the speech engine"""###
 
@@ -47,8 +47,6 @@ trial_duration = 20.0 #trial duration in seconds
 #speech_engine.setProperty('voice', voices[0].id)   #changing index, changes voices. 1 for female
 
 speech_engine.say("Welcome to the Glorius fMRI Experiment")
-#speech_engine.say(str(random.randrange(1, 11)))
-#speech_engine.say('My current speaking rate is ' + str(rate))
 speech_engine.runAndWait()
 
 
@@ -128,9 +126,25 @@ Instructions = visual.TextStim(win=win, ori=0, name='Next_Scan_Ready',
 Instructions.draw()
 win.flip()
 
+
+Status = visual.TextStim(win=win, ori=0, name='Within trial status',
+  text=u'',    font='Arial',
+  units='deg', pos=[0, 0],alignHoriz='center',height=1,  wrapWidth=18, bold=True,
+  color='Green', colorSpace='rgb', opacity=1)
+
+
+
 #wait for trigger and sychronize
 event.waitKeys(maxWait=6400, keyList=['5'], timeStamped=True)
 logging.flush()
+
+
+Status.setText("Trigger Received, Baseline Recording")
+Status.setColor("Green")
+Status.setAutoDraw(True)
+win.flip()
+core.wait(10)
+
 
 
 while trial_counter < number_of_trials-1:
@@ -146,12 +160,31 @@ while trial_counter < number_of_trials-1:
     speech_engine.say(str(trial_order_list.COUNTDOWN_NUMBER[trial_counter]))
     speech_engine.runAndWait()
     trialTimer.add(trial_duration)
+    
+    
+    Status.setText("In Trial "+str(trial_counter+1))
+    Status.setColor("Green")
+    Status.setAutoDraw(True)
+    win.flip()
 
     # -------Run Routine "trial"-------
     while trialTimer.getTime() > 0:
+    
+
         current_frame_number = current_frame_number + 1 
-        #print (current_frame_number)
         win.flip()
+        
+        if defaultKeyboard.getKeys(keyList=["6"]):
+            Status.setText("Button Pressed, Trial Started")
+            win.flip()
+            
+        if defaultKeyboard.getKeys(keyList=["7"]):
+            Status.setText("Button Pressed, Trial Ended.\nWaiting 5 Sec")
+            Status.setColor("Red")
+            win.flip()
+            core.wait(5)
+            break
+        
         if defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
 
